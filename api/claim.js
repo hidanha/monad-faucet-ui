@@ -6,18 +6,16 @@ export default async function handler(req, res) {
     const { address } = req.body;
     if (!ethers.utils.isAddress(address)) return res.status(400).json({ message: "Invalid address" });
 
-    // Konfigurasi provider & wallet
+    // Konfigurasi provider
     const provider = new ethers.providers.JsonRpcProvider("https://testnet-rpc.monad.io");
-    const privateKey = process.env.PRIVATE_KEY;  // Simpan di Vercel env
-    const wallet = new ethers.Wallet(privateKey, provider);
 
     // Kontrak Faucet
     const contractAddress = "0x67b32f1146e0ea1d3234bb0b6ae965bac138ee94"; // Ganti dengan kontrak faucet kamu
     const abi = [ "function sendFaucet(address recipient) external" ];
-    const contract = new ethers.Contract(contractAddress, abi, wallet);
+    const contract = new ethers.Contract(contractAddress, abi, provider);
 
     try {
-        const tx = await contract.sendFaucet(address);
+        const tx = await contract.sendFaucet(address); // Kirim dari saldo smart contract
         await tx.wait();
         res.status(200).json({ message: "Success!", txHash: tx.hash });
     } catch (error) {
