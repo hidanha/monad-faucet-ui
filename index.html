@@ -1,38 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monad Faucet</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input { padding: 10px; width: 300px; margin-top: 10px; }
-        button { padding: 10px; background: #1E9F98; color: white; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h2>Monad Faucet</h2>
-    <p>Masukkan alamat wallet untuk klaim 0.1 MON</p>
-    <input type="text" id="walletAddress" placeholder="0x...">
-    <button onclick="claimFaucet()">Klaim</button>
+<input type="text" id="walletAddress" placeholder="Enter your wallet address">
+<button onclick="claimFaucet()">Claim</button>
+<p id="status"></p>
 
-    <script>
-        async function claimFaucet() {
-            const walletAddress = document.getElementById("walletAddress").value;
-            if (!walletAddress.startsWith("0x") || walletAddress.length !== 42) {
-                alert("Alamat tidak valid!");
-                return;
-            }
+<script>
+    async function claimFaucet() {
+        const address = document.getElementById("walletAddress").value;
+        const status = document.getElementById("status");
+        status.innerText = "Processing...";
 
-            const response = await fetch('https://api.example.com/claim', {  // Ganti dengan backend
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: walletAddress })
+        try {
+            const response = await fetch("/api/claim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ address }),
             });
 
             const data = await response.json();
-            alert(data.message);
+            if (response.ok) {
+                status.innerText = `Success! TX: ${data.txHash}`;
+            } else {
+                status.innerText = `Error: ${data.message}`;
+            }
+        } catch (error) {
+            status.innerText = "Request failed.";
         }
-    </script>
-</body>
-</html>
+    }
+</script>
